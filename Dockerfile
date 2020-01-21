@@ -19,9 +19,10 @@ RUN apk add --no-cache --virtual .gettext gettext \
 
 # main stage
 #
-# NB we setup envsust in separate stage because ficusio/openresty
-# ONBUILD loads nginx, which triggers rebuild from start. This way
-# we can avoid rebuild.
+# NB we setup envsubst in separate stage because ficusio/openresty
+# ONBUILD loads nginx configuration, which triggers rebuild from 
+# start. This way we can avoid reinstall of envsubst if we change
+# nginx config.
 FROM ficusio/openresty:1.9 as nginx
 COPY --from=base /usr/local/bin/envsubst /usr/local/bin/envsubst
 COPY --from=base /usr/lib/libintl.so.8.1.4 /usr/lib/libintl.so.8 /usr/lib/

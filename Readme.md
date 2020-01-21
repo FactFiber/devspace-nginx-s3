@@ -3,7 +3,7 @@
 Docker image and devspace configuration for kubernetes service which
 serves files from private S3 repository.
 
-# Usage
+## Usage
 
 See [Devspace docs](https://devspace.cloud/docs/introduction) for
 instructions on deployment to kubernetes, development, and composition
@@ -21,3 +21,8 @@ To limit security ramifications, we recommend creating an IAM role
 and access key to serve this particular bucket/path. Also, 
 [sealed secrets](https://github.com/bitnami-labs/sealed-secrets)
 are useful to limit access to the secret.
+
+## Acknolwedgements
+
+* Based on [ficusio/openresty](https://hub.docker.com/r/ficusio/openresty/), which is an alpine-based image.
+* Takes envsubst setup from [official docker nginx image](https://hub.docker.com/_/nginx)
