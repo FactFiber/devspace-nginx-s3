@@ -1,0 +1,49 @@
+version: v1beta6
+images:
+  nginx-s3:
+    image: factfiber/nginx-s3
+
+deployments:
+- name: nginx-s3
+  helm:
+    componentChart: true
+    values:
+      containers:
+      - image: factfiber/nginx-s3
+        env:
+        - name: s3_bucket
+          valueFrom:
+            secretKeyRef:
+              name: ${NGINX_S3_SECRET}
+              key: s3_bucket
+        - name: prefix
+          valueFrom:
+            secretKeyRef:
+              name: ${NGINX_S3_SECRET}
+              key: prefix
+        - name: aws_key
+          valueFrom:
+            secretKeyRef:
+              name: ${NGINX_S3_SECRET}
+              key: aws_key
+        - name: aws_secret
+          valueFrom:
+            secretKeyRef:
+              name: ${NGINX_S3_SECRET}
+              key: aws_secret
+      service:
+        ports:
+        - port: 80
+
+dev:
+  ports:
+  - labelSelector:
+      app.kubernetes.io/name: devspace-app
+      app.kubernetes.io/component: nginx-s3
+    forward:
+    - port: 8080
+      remotePort: 80
+
+vars:
+- name: NGINX_S3_SECRET
+  question: "Name of secret for S3 access"

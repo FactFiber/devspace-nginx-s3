@@ -1,0 +1,49 @@
+# inspiration: https://github.com/Fanatics/Docker-Nginx-S3-Proxy
+# https://serverfault.com/questions/693822/nginx-as-s3-proxy-with-private-buckets
+
+daemon off;
+error_log /dev/stderr info;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+
+    server {
+        listen 80;
+        # server_name [$server_name];
+
+        location ~ '^/(.*)' {
+            # access_log /dev/stderr combined;
+
+            resolver              8.8.8.8 valid=300s;
+            resolver_timeout      20s;
+            # resolver               172.31.0.2 valid=300s;
+            # resolver_timeout       10s;
+
+            # parameters from envsubst
+            set $bucket           '$s3_bucket';
+            set $key              '$aws_key';
+            set $secret           '$aws_secret';
+
+            set $url_full         "$prefix$1";
+            set_by_lua $now       "return ngx.cookie_time(ngx.time())";
+            set $aws_signature    '';
+            set $string_to_sign   "$request_method\n\n\n\nx-amz-date:${now}\n/$bucket/$url_full";
+            set_hmac_sha1          $aws_signature $secret $string_to_sign;
+            set_encode_base64      $aws_signature $aws_signature;
+            proxy_http_version     1.1;
+            proxy_set_header       Host $bucket.s3.amazonaws.com;
+            proxy_set_header       x-amz-date $now;
+            proxy_set_header       Authorization "AWS $key:$aws_signature";
+            proxy_hide_header      Content-Type;
+            proxy_buffering        off;
+            proxy_intercept_errors on;
+
+            rewrite .*             /$url_full break;
+
+            proxy_pass             http://s3.amazonaws.com;
+        }
+    }
+}
