@@ -1,0 +1,5 @@
+.devspace/
+tmp/
+*.code-workspace
+.gitignore
+devspace.yaml
